@@ -16,19 +16,19 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get form values
-    features = [float(x) for x in request.form.values()]
+    if request.is_json:
+        data = request.get_json()
+        features = [float(data[col]) for col in [
+            'Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness',
+            'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age'
+        ]]
+    else:
+        features = [float(x) for x in request.form.values()]
 
-    # Scale and reshape input
     final_input = scaler.transform([features])
-
-    # Make prediction
     prediction = model.predict(final_input)[0]
-
-    # Result text
     result = "Diabetic" if prediction == 1 else "Not Diabetic"
-
-    return render_template('index.html', prediction_text=f'Prediction: {result}')
+    return {"prediction": result}
 
 
 if __name__ == '__main__':
